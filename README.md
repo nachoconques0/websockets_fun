@@ -86,3 +86,7 @@ This project implements two microservices that communicate through a Redis Strea
  ┣ 📜go.sum
  ┗ 📜main.go
 ```
+
+### Example
+https://github.com/user-attachments/assets/b4f0aa5c-77ba-4e51-ab0e-0720cd14fdb8
+
