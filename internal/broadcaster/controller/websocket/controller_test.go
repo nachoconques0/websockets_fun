@@ -6,23 +6,21 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gorilla/websocket"
-	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 
-	controller "github.com/nachoconques0/websockets_fun/internal/manager/controller/manager"
+	"github.com/gorilla/websocket"
+	controller "github.com/nachoconques0/websockets_fun/internal/broadcaster/controller/websocket"
 	"github.com/nachoconques0/websockets_fun/internal/mocks"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestHandleIncomingConnection_PublishesMessage(t *testing.T) {
+func TestHandleIncomingConnection_AddAndRemoveClient(t *testing.T) {
 	ctrl := gomock.NewController(t)
+	mockService := mocks.NewMockBroadcasterService(ctrl)
 	defer ctrl.Finish()
 
-	mockService := mocks.NewMockService(ctrl)
-	mockService.EXPECT().
-		PublishMessage("hello").
-		Return(nil).
-		Times(1)
+	mockService.EXPECT().AddClient(gomock.Any()).Times(1)
+	mockService.EXPECT().RemoveClient(gomock.Any()).Times(1)
 
 	wsController := controller.New(mockService)
 
@@ -33,10 +31,7 @@ func TestHandleIncomingConnection_PublishesMessage(t *testing.T) {
 
 	conn, _, err := websocket.DefaultDialer.Dial(url, nil)
 	assert.NoError(t, err)
-	defer conn.Close()
-
-	err = conn.WriteMessage(websocket.TextMessage, []byte("hello"))
-	assert.NoError(t, err)
+	conn.Close()
 
 	time.Sleep(100 * time.Millisecond)
 }

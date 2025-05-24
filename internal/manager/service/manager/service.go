@@ -1,6 +1,9 @@
 package service
 
-import "fmt"
+import (
+	"fmt"
+	"log/slog"
+)
 
 // Publisher holds needed methods for the publisher client
 type Publisher interface {
@@ -23,7 +26,8 @@ func New(p Publisher) *Service {
 func (s *Service) PublishMessage(msg string) error {
 	err := s.publisher.PublishMessage(msg)
 	if err != nil {
-		fmt.Println("there was an error publishing message")
+		slog.Error(fmt.Sprintf("there was an error publishing message err: %s\n", err))
+		return err
 	}
 	return nil
 }

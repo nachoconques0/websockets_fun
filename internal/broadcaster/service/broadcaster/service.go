@@ -1,6 +1,8 @@
 package service
 
 import (
+	"fmt"
+	"log/slog"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -40,6 +42,7 @@ func (s *Service) Broadcast(msg string) {
 	for conn := range s.clients {
 		err := conn.WriteMessage(websocket.TextMessage, []byte(msg))
 		if err != nil {
+			slog.Error(fmt.Sprintf("when writting message in broadcast err: %s\n", err))
 			// Clean up dead connection
 			delete(s.clients, conn)
 			conn.Close()

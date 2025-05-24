@@ -1,17 +1,22 @@
-package subscriber
+package controller
 
 import (
 	"context"
 	"fmt"
 	"time"
 
+	"github.com/gorilla/websocket"
 	"github.com/redis/go-redis/v9"
 )
 
+// Service contains service methods
 type Service interface {
+	AddClient(conn *websocket.Conn)
+	RemoveClient(conn *websocket.Conn)
 	Broadcast(msg string)
 }
 
+// Controllers holds the client and needed fields
 type Controller struct {
 	client  *redis.Client
 	queue   string
@@ -19,6 +24,7 @@ type Controller struct {
 	ctx     context.Context
 }
 
+// New returns a new controller
 func New(client *redis.Client, queue string, service Service) *Controller {
 	return &Controller{
 		client:  client,
@@ -28,6 +34,7 @@ func New(client *redis.Client, queue string, service Service) *Controller {
 	}
 }
 
+// Start starts a infinte loop in order to read from the stream
 func (c *Controller) Start() {
 	lastID := "0"
 	for {

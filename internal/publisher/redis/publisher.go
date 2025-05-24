@@ -3,31 +3,35 @@ package redis
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/redis/go-redis/v9"
 )
 
-type RedisPublisher struct {
+// Publisher contains Publisher fields
+type Publisher struct {
 	client *redis.Client
 	ctx    context.Context
 	stream string
 }
 
-func New(client *redis.Client, stream string) *RedisPublisher {
-	return &RedisPublisher{
+// New returns a new Publisher client
+func New(client *redis.Client, stream string) *Publisher {
+	return &Publisher{
 		client: client,
 		ctx:    context.Background(),
 		stream: stream,
 	}
 }
 
-func (p *RedisPublisher) PublishMessage(msg string) error {
+// PublishMessage publish a messsage to the respective stream
+func (p *Publisher) PublishMessage(msg string) error {
 	err := p.client.XAdd(p.ctx, &redis.XAddArgs{
 		Stream: p.stream,
 		Values: map[string]interface{}{"body": msg},
 	}).Err()
 	if err != nil {
-		fmt.Println("Error publishing to Redis:", err)
+		slog.Error(fmt.Sprintf("PublishMessage to redis err: %s\n", err))
 		return err
 	}
 	fmt.Println("Published to Redis:", msg)
