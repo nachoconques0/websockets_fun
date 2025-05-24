@@ -19,9 +19,9 @@ type Controller struct {
 	ctx         context.Context
 }
 
-func New(addr, queue string, broadcaster Broadcaster) *Controller {
+func New(client *redis.Client, queue string, broadcaster Broadcaster) *Controller {
 	return &Controller{
-		client:      redis.NewClient(&redis.Options{Addr: addr}),
+		client:      client,
 		queue:       queue,
 		broadcaster: broadcaster,
 		ctx:         context.Background(),

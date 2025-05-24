@@ -1,7 +1,6 @@
 package broadcaster
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"sync"
@@ -44,14 +43,12 @@ func (b *Broadcaster) ServeWS(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b *Broadcaster) AddClient(conn *websocket.Conn) {
-	fmt.Println("adding client?")
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	b.clients[conn] = true
 }
 
 func (b *Broadcaster) RemoveClient(conn *websocket.Conn) {
-	fmt.Println("removing client?")
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	delete(b.clients, conn)

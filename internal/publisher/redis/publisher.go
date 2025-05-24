@@ -13,9 +13,9 @@ type RedisPublisher struct {
 	stream string
 }
 
-func New(addr, stream string) *RedisPublisher {
+func New(client *redis.Client, stream string) *RedisPublisher {
 	return &RedisPublisher{
-		client: redis.NewClient(&redis.Options{Addr: addr}),
+		client: client,
 		ctx:    context.Background(),
 		stream: stream,
 	}
