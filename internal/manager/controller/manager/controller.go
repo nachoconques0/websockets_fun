@@ -1,4 +1,4 @@
-package manager
+package controller
 
 import (
 	"fmt"
@@ -13,40 +13,39 @@ var wsUpgrader = websocket.Upgrader{
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
-type Publisher interface {
+// Service holds needed methods for the controller to be used
+type Service interface {
 	PublishMessage(msg string) error
 }
 
-type Manager struct {
-	publisher Publisher
+// Controller holds service
+type Controller struct {
+	Service Service
 }
 
-func NewManager(p Publisher) *Manager {
-	return &Manager{
-		publisher: p,
+// New returns a new controller
+func New(service Service) *Controller {
+	return &Controller{
+		Service: service,
 	}
 }
 
-func (m *Manager) ServeWS(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("We just got a connection")
+// HandleIncomingConnection handles incoming connection, upgrated it to use WS and then
+// calls service to publish to queue
+func (c *Controller) HandleIncomingConnection(w http.ResponseWriter, r *http.Request) {
 	conn, err := wsUpgrader.Upgrade(w, r, nil)
 	if err != nil {
 		fmt.Println("there was an error upgrading the HTTP connection")
 		return
 	}
 	defer conn.Close()
-
-	m.publishIncomingMsg(conn)
-}
-
-func (m *Manager) publishIncomingMsg(conn *websocket.Conn) {
 	for {
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
 			fmt.Println("there was an error reading message:", err)
 			break
 		}
-		err = m.publisher.PublishMessage(string(msg))
+		err = c.Service.PublishMessage(string(msg))
 		if err != nil {
 			fmt.Println("there was an error publishing message")
 		}

@@ -8,23 +8,23 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type Broadcaster interface {
+type Service interface {
 	Broadcast(msg string)
 }
 
 type Controller struct {
-	client      *redis.Client
-	queue       string
-	broadcaster Broadcaster
-	ctx         context.Context
+	client  *redis.Client
+	queue   string
+	service Service
+	ctx     context.Context
 }
 
-func New(client *redis.Client, queue string, broadcaster Broadcaster) *Controller {
+func New(client *redis.Client, queue string, service Service) *Controller {
 	return &Controller{
-		client:      client,
-		queue:       queue,
-		broadcaster: broadcaster,
-		ctx:         context.Background(),
+		client:  client,
+		queue:   queue,
+		service: service,
+		ctx:     context.Background(),
 	}
 }
 
@@ -47,7 +47,7 @@ func (c *Controller) Start() {
 				lastID = msg.ID
 				if val, ok := msg.Values["body"]; ok {
 					text := fmt.Sprintf("%v", val)
-					c.broadcaster.Broadcast(text)
+					c.service.Broadcast(text)
 					fmt.Println("Broadcasted:", text)
 				}
 			}
